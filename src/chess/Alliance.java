@@ -5,7 +5,7 @@ import chess.player.Player;
 import chess.player.WhitePlayer;
 
 public enum Alliance {
-    WHITE{
+    WHITE {
         @Override
         public int getDirection() {
             return -1;
@@ -26,7 +26,7 @@ public enum Alliance {
             return whitePlayer;
         }
     },
-    BLACK{
+    BLACK {
         @Override
         public int getDirection() {
             return 1;
@@ -49,7 +49,9 @@ public enum Alliance {
     };
 
     public abstract int getDirection();
+
     public abstract boolean isWhite();
+
     public abstract boolean isBlack();
 
     public abstract Player choosePlayer(WhitePlayer whitePlayer, BlackPlayer blackPlayer);
