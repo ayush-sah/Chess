@@ -32,6 +32,8 @@ public class Table {
     private final static Dimension TILE_PANEL_DIMENSION = new Dimension(10, 10);
     private static final String defaultPieceImagesPath = "images/pieces/";
     private final JFrame gameFrame;
+    private final GameHistoryPanel gameHistoryPanel;
+    private final TakenPiecesPanel takenPiecesPanel;
     private final BoardPanel boardPanel;
     private final Color lightTileColor = Color.decode("#FFFACD");
     private final Color darkTileColor = Color.decode("#593E1A");
@@ -41,6 +43,7 @@ public class Table {
     private Piece humanMovedPiece;
     private BoardDirection boardDirection;
     private boolean highlightLegalMoves;
+    private final Movelog movelog;
 
     public Table() throws IOException {
         this.gameFrame = new JFrame("Chess");
@@ -49,10 +52,15 @@ public class Table {
         this.gameFrame.setJMenuBar(tableMenuBar);
         this.gameFrame.setSize(OUTER_FRAME_DIMENSION);
         this.chessBoard = Board.createStandardBoard();
+        this.gameHistoryPanel = new GameHistoryPanel();
+        this.takenPiecesPanel = new TakenPiecesPanel();
         this.boardPanel = new BoardPanel();
+        this.movelog = new Movelog();
         this.boardDirection = BoardDirection.NORMAL;
         this.highlightLegalMoves = false;
+        this.gameFrame.add(this.takenPiecesPanel, BorderLayout.WEST);
         this.gameFrame.add(this.boardPanel, BorderLayout.CENTER);
+        this.gameFrame.add(this.gameHistoryPanel, BorderLayout.EAST);
         this.gameFrame.setVisible(true);
     }
 
@@ -165,7 +173,30 @@ public class Table {
             repaint();
         }
     }
-
+    public static class Movelog{
+        private final List<Move> moves;
+        Movelog(){
+            this.moves = new ArrayList<>();
+        }
+        public List<Move> getMoves(){
+            return this.moves;
+        }
+        public void addMove(final Move move){
+            this.moves.add(move);
+        }
+        public int size(){
+            return this.moves.size();
+        }
+        public void clear(){
+            this.moves.clear();
+        }
+        public Move removeMove(int index){
+            return this.moves.remove(index);
+        }
+        public boolean removeMove(final Move move){
+            return this.moves.remove(move);
+        }
+    }
     private class TilePanel extends JPanel {
         private final int tileID;
 
@@ -195,6 +226,7 @@ public class Table {
                             final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
                             if (transition.getMoveStatus().isDone()) {
                                 chessBoard = transition.getTransitionBoard();
+                                movelog.addMove(move);
                             }
                             sourceTile = null;
                             destinationTile = null;
@@ -204,6 +236,8 @@ public class Table {
                             @Override
                             public void run() {
                                 try {
+                                    gameHistoryPanel.redo(chessBoard, movelog);
+                                    takenPiecesPanel.redo(movelog);
                                     boardPanel.drawBoard(chessBoard);
                                 } catch (IOException ioException) {
                                     ioException.printStackTrace();
