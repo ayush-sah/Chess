@@ -42,7 +42,7 @@ public class LoginForm extends JFrame{
                     }
                     else{
                         JOptionPane.showMessageDialog(null, "Incorrect Username and Password");
-                        txtf_password.setText("");
+                        txtf_username.setText("");
                         txtf_password.setText("");
                     }
                     con.close();
